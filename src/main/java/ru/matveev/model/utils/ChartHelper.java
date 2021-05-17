@@ -8,6 +8,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import ru.matveev.model.entity.ChartData;
+import ru.matveev.model.entity.generators.MatrixGenerator;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -21,10 +22,41 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ChartHelper {
+
+    public static void getGist(String name, List<double[][]> matrixes, int scope) throws IOException {
+        int count = matrixes.size();
+        Map<Double, Double> dataMap = new HashMap<>();
+        List<Double> result = new ArrayList<>();
+        for (double[][] matrix: matrixes) {
+            result.add(MatrixCountHelper.countAMax(matrix));
+        }
+
+        double min = result.stream().mapToDouble(Double::doubleValue).min().orElse(0d);
+        double max = result.stream().mapToDouble(Double::doubleValue).max().orElse(1d);
+
+        double maxY = -1000;
+
+        double step = (max - min) / scope;
+        for (int i=1; i<scope; i++) {
+            int k = i;
+            double val = min + (step*k);
+            long num = result.stream().mapToDouble(Double::doubleValue).filter(d -> d > min + (step*(k-1)) && d < min + (step*k)).count();
+            double p = num / (double) count;
+            dataMap.put(val,  p);
+            if (p > maxY) {
+                maxY = p;
+            }
+        }
+
+        XYSeries serie = new XYSeries("gist");
+        dataMap.forEach(serie::add);
+        saveChartToFile(new ChartData().setFileName(name).setSeries(List.of(serie)).setMaxAxesVal(0d).setMaxAxesVal(maxY+0.02));
+    }
 
     public static void saveChartToFile(ChartData chartData) throws IOException {
         XYSeriesCollection dataset = new XYSeriesCollection();
@@ -44,6 +76,8 @@ public class ChartHelper {
         plot.setBackgroundPaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.BLACK);
         plot.setDomainGridlinePaint(Color.BLACK);
+        plot.getRenderer(0).setSeriesPaint(3, Color.BLACK);
+        plot.getRenderer(0).setSeriesPaint(4, Color.ORANGE);
 
         plot.getRangeAxis().setRange(chartData.getMinAxesVal(), chartData.getMaxAxesVal());
 

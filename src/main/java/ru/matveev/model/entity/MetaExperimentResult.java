@@ -10,7 +10,9 @@ import java.util.Map;
 @Setter
 @Accessors(chain = true)
 public class MetaExperimentResult {
+    private double[][] resultMatrix;
     private double deltaAMax;
+    private double lgDeltaAMax;
     private int increaseStep;
     private int finalStep;
     private int vertexes;

@@ -3,7 +3,7 @@ package ru.matveev.model.utils;
 public class InterestingMatrix {
 
     // Матрица из диплома Власовой
-    public double[][] matrix0 = new double[][]{
+    public static double[][] matrix0 = new double[][]{
             {1.00, 0.95, 0.95, 0.00, 0.00, 0.95},
             {0.98, 1.00, 0.98, 0.00, 0.00, 0.00},
             {0.94, 0.94, 1.00, 0.94, 0.94, 0.00},

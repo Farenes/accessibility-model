@@ -32,10 +32,12 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
     @Override
     public ExperimentResult make() {
         List<Double> aMaxDeltas = new ArrayList<>();
+        List<Double> lgAMaxDeltas = new ArrayList<>();
         List<Map<Integer, Double>> aMinExps = new ArrayList<>();
         List<Map<Integer, Double>> aMaxExps = new ArrayList<>();
         List<Integer> increaseSteps = new ArrayList<>();
         List<Integer> finalSteps = new ArrayList<>();
+        List<double[][]> resultMatrixes = new ArrayList<>();
         int vertexes = 0;
         int edges = 0;
         int fails = 0;
@@ -49,17 +51,20 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
             }
 
             aMaxDeltas.add(result.getDeltaAMax());
+            lgAMaxDeltas.add(result.getLgDeltaAMax());
             aMinExps.add(result.getAMinMap());
             aMaxExps.add(result.getAMaxMap());
             increaseSteps.add(result.getIncreaseStep());
             finalSteps.add(result.getFinalStep());
             vertexes = result.getVertexes();
             edges = result.getEdges();
+            resultMatrixes.add(result.getResultMatrix());
         }
 
         log.debug("Spanning tree size: {}", vertexes-1);
         log.debug("Max steps: {}", edges - (vertexes-1));
         log.debug("Average aMax grow: {} %", aMaxDeltas.stream().mapToDouble(Double::doubleValue).average().orElse(0)*100);
+        log.debug("Average Lg aMax grow: {} %", lgAMaxDeltas.stream().mapToDouble(Double::doubleValue).average().orElse(0)*100);
         log.debug("Average step for equal: {}", Math.round(increaseSteps.stream().mapToInt(Integer::intValue).average().orElse(0)));
         log.debug("Average steps for alpha: {}", Math.round(finalSteps.stream().mapToInt(Integer::intValue).average().orElse(0)));
         log.debug("Fails: {} on {} experiments", fails, count);
@@ -84,6 +89,7 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
         }
 
         return new ExperimentResult()
+                .setResultMatrix(resultMatrixes)
                 .setAMinSeries(List.of(aMinSeries))
                 .setAMaxSeries(List.of(aMaxSeries))
                 .setMinAxesVal(min)
@@ -103,7 +109,10 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
 
         double[][] matrix = spanningTreeCounter.count(initMatrix);
 
-        int step = 1;
+        aMaxMap.put(1, MatrixCountHelper.countAMax(matrix));
+        aMinMap.put(1, MatrixCountHelper.countAMin(matrix));
+
+        int step = 2;
 
         double preAMax = MatrixCountHelper.countAMax(matrix);
         double[][] preMatrix = matrix;
@@ -133,13 +142,18 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
 
         double finishAMax = MatrixCountHelper.countAMax(matrix);
         double deltaAMax = (finishAMax - startAMax) / startAMax;
+        double startLogAMax = -Math.log10(1 - startAMax);
+        double finishLogAMax = -Math.log10(1 - finishAMax);
+        double logDeltaAMax = (finishLogAMax - startLogAMax) / startLogAMax;
 
         return new MetaExperimentResult()
+                .setResultMatrix(matrix)
                 .setVertexes(initMatrix.length)
                 .setEdges(MatrixCountHelper.countEdges(initMatrix))
                 .setAMaxMap(aMaxMap)
                 .setAMinMap(aMinMap)
                 .setDeltaAMax(deltaAMax)
+                .setLgDeltaAMax(logDeltaAMax)
                 .setIncreaseStep(increaseStep)
                 .setFinalStep(step-1);
     }

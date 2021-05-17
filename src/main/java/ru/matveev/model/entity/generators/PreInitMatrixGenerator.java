@@ -17,7 +17,7 @@ public class PreInitMatrixGenerator implements MatrixGenerator {
     public PreInitMatrixGenerator(int count, int vertexes, int edges) {
         matrixes = new ArrayList<>();
         for (int i=0; i<count; i++) {
-            matrixes.add(MatrixEditorHelper.generateMatrix(vertexes, edges, 0.85, 0.99));
+            matrixes.add(MatrixEditorHelper.generateMatrix(vertexes, edges, 0.5, 0.85));
         }
     }
 

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.matveev.model.utils.MatrixCountHelper;
 
 /**
- * Поиск остовного дерева из случайного набора остовных деревьев, у которго aMax наибольшим
+ * Поиск остовного дерева из случайного набора остовных деревьев, у которого aMax наибольшим
  * randomCount - количество генерируемых остовных деревьев
  */
 @RequiredArgsConstructor

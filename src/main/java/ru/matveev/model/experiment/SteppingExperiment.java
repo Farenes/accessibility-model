@@ -13,7 +13,10 @@ import ru.matveev.model.entity.StepData;
 import ru.matveev.model.utils.MatrixCountHelper;
 import ru.matveev.model.utils.MatrixUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -59,8 +62,11 @@ public class SteppingExperiment implements Experiment {
             step++;
         }
 
+        List<double[][]> resultMatrix = new ArrayList<>();
+        resultMatrix.add(matrix);
+
         return new ExperimentResult()
-                .setResultMatrix(matrix)
+                .setResultMatrix(resultMatrix)
                 .setAMinSeries(List.of(aMinSeries))
                 .setAMaxSeries(List.of(aMaxSeries))
                 .setEdgesSeries(edgesSeries)

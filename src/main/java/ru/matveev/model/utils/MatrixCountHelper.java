@@ -84,8 +84,8 @@ public class MatrixCountHelper {
         double[][] matrixH = countMatrixHMax(initNearMatrix);
         double[][] matrixFW = countMatrixFWMax(initNearMatrix, matrixH);
         setOneToMainDiagonal(matrixFW);
-        double dMax = normDistKolmagorov(matrixFW);
-        return countAvailability(dMax, initNearMatrix.length);
+        double dMax = normDistKolmagorovP1(matrixFW);
+        return countAvailabilityLinearRight(dMax, initNearMatrix.length);
     }
 
     public static double[][] countMatrixHMax(double[][] initNearMatrix) {
@@ -129,11 +129,11 @@ public class MatrixCountHelper {
         double[][] matrixG = countMatrixGMin(initNearMatrix);
         double[][] matrixFW = countMatrixFWMin(initNearMatrix, matrixH, matrixG);
         setOneToMainDiagonal(matrixFW);
-        double dMin = normDistKolmagorov(matrixFW);
-        return countAvailability(dMin, initNearMatrix.length);
+        double dMin = normDistKolmagorovP1(matrixFW);
+        return countAvailabilityLinearRight(dMin, initNearMatrix.length);
     }
 
-    private static double[][] clearInitMinMatrix(double[][] matrix) {
+    public static double[][] clearInitMinMatrix(double[][] matrix) {
         double[][] clearedMatrix = MatrixUtils.copyMatrix(matrix);
         for (int i=0; i<clearedMatrix.length; i++) {
             for (int j = 0; j < clearedMatrix[0].length; j++) {
@@ -147,7 +147,7 @@ public class MatrixCountHelper {
         return clearedMatrix;
     }
 
-    private static double[][] countMatrixHMin(double[][] initNearMatrix) {
+    public static double[][] countMatrixHMin(double[][] initNearMatrix) {
         double[][] matrixH = MatrixUtils.copyMatrix(initNearMatrix);
         for (int i=0; i<initNearMatrix.length; i++) {
             for (int j=0; j<initNearMatrix[0].length; j++) {
@@ -161,7 +161,7 @@ public class MatrixCountHelper {
         return matrixH;
     }
 
-    private static double[][] countMatrixGMin(double[][] initNearMatrix) {
+    public static double[][] countMatrixGMin(double[][] initNearMatrix) {
         double[][] matrixG = MatrixUtils.copyMatrix(initNearMatrix);
         for (int i=0; i<initNearMatrix.length; i++) {
             for (int j=0; j<initNearMatrix[0].length; j++) {
@@ -177,7 +177,7 @@ public class MatrixCountHelper {
         return matrixG;
     }
 
-    private static double[][] countMatrixFWMin(double[][] nearMatrix, double[][] matrixH, double[][] matrixG) {
+    public static double[][] countMatrixFWMin(double[][] nearMatrix, double[][] matrixH, double[][] matrixG) {
         double[][] matrixFW = MatrixUtils.copyMatrix(nearMatrix);
         for (int k=0; k<nearMatrix.length; k++) {
             for (int i=0; i<nearMatrix.length; i++) {
@@ -197,7 +197,7 @@ public class MatrixCountHelper {
         return matrixFW;
     }
 
-    private static double normDistKolmagorov(double[][] matrix) {
+    public static double normDistKolmagorovP2(double[][] matrix) {
         double[][] aGlobMatrix = new double[matrix.length][matrix[0].length];
         setOneToAllMatrix(aGlobMatrix);
         double[][] matrixV = MatrixUtils.copyMatrix(aGlobMatrix);
@@ -228,6 +228,27 @@ public class MatrixCountHelper {
         }
 
         return Math.sqrt(sumI);
+    }
+
+    public static double normDistKolmagorovP1(double[][] matrix) {
+        double[][] aGlobMatrix = new double[matrix.length][matrix[0].length];
+        setOneToAllMatrix(aGlobMatrix);
+        double[][] matrixV = MatrixUtils.copyMatrix(aGlobMatrix);
+        for (int i=0; i<matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                matrixV[i][j] = aGlobMatrix[i][j] - matrix[i][j];
+            }
+        }
+
+        double sumI = 0;
+
+        for (int i=0; i<matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                sumI += (1d / 2d) * matrixV[i][j];
+            }
+        }
+
+        return sumI;
     }
 
     public static double[][] getMaxSpanningTree(double[][] matrix) {
@@ -341,13 +362,43 @@ public class MatrixCountHelper {
         return 3.38745 * Math.pow(10, -6) * Math.pow(length, 3) + 0.0140894 * Math.pow(length, 2) + 5.2436 * length - 146.096;
     }
 
-    private static double countAvailability(double d, double length) {
+    private static double countDMax(int length) {
+        double[][] zeroMatrix = new double[length][length];
+        return normDistKolmagorovP1(zeroMatrix);
+    }
+
+    private static double countAvailabilityExpRight(double d, int length) {
+        double dMax = countDMax(length);
+        return Math.pow(Math.E, (-d / dMax));
+    }
+
+    private static double countAvailabilitySqrtRight(double d, int length) {
+        double dMax = countDMax(length);
+        return Math.sqrt(1 - Math.pow(d/dMax, 2));
+    }
+
+    private static double countAvailabilityLinearRight(double d, int length) {
+        double dMax = countDMax(length);
+        return 1 - (d/dMax);
+    }
+
+    private static double countAvailabilityExp(double d, double length) {
         if (length < 50) {
             double dSmall = countDSmall(length);
             return Math.pow(Math.E, (-d / dSmall));
         } else {
             double dBig = countDBig(length);
             return Math.pow(Math.E, (-d / dBig));
+        }
+    }
+
+    private static double countAvailabilityLinear(double d, double length) {
+        if (length < 50) {
+            double dSmall = countDSmall(length);
+            return d/dSmall;
+        } else {
+            double dBig = countDBig(length);
+            return d/dBig;
         }
     }
 

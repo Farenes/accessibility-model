@@ -12,7 +12,7 @@ import java.util.List;
 @Accessors(chain = true)
 public class ExperimentResult {
 
-    private double[][] resultMatrix;
+    private List<double[][]> resultMatrix;
     private List<XYSeries> aMinSeries;
     private List<XYSeries> aMaxSeries;
     private XYSeries edgesSeries;

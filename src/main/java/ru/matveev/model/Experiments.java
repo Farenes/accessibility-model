@@ -223,6 +223,59 @@ public class Experiments {
                 List.of(spanningTreeRandomExperiment, spanningTreeMaxExperiment)));
     }
 
+    public static void all() {
+        double alpha = 0.00001;
+        int vertexes = 10;
+        int edges = 25;
+        int count = 1000;
+        int spanningTreeCount = 1000;
+        PreInitMatrixGenerator preGen = new PreInitMatrixGenerator(count, vertexes, edges);
+        Experiment experiment1 = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 007. К звездам",
+                "",
+                count, alpha,
+                preGen,
+                new MaxSpanningTreeCounter(),
+                new ToStarsStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        Experiment experiment2 = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 009. С лучшей суммой",
+                "",
+                count, alpha,
+                preGen,
+                new MaxSpanningTreeCounter(),
+                new AddingBestSumEdgesStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        Experiment experiment3 = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 008. С худшей связью",
+                "",
+                count, alpha,
+                preGen,
+                new MaxSpanningTreeCounter(),
+                new AddingWorsePathWithAlphaStep(alpha),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        Experiment spanningTreeRandomExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с рандомом",
+                "",
+                count, alpha,
+                preGen,
+                new BestRandomSpanningTreeCounter(spanningTreeCount),
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с макс",
+                "",
+                1000, alpha,
+                preGen,
+                new MaxSpanningTreeCounter(),
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        Experiments.makeExperiment(new CompareExperiment(
+                "Эксперимент 011. Сравнение",
+                "",
+                List.of(experiment3, experiment1, experiment2, spanningTreeRandomExperiment, spanningTreeMaxExperiment)));
+    }
+
     public static void makeExperiment(Experiment experiment) {
         try {
             log.debug("{}. {}", experiment.getName(), experiment.getDescription());

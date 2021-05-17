@@ -18,7 +18,7 @@ public class ExperimentHelper {
             ChartHelper.saveChartToFile(new ChartData()
                     .setSeries(List.of(result.getPointsSeries()))
                     .setMinAxesVal(0)
-                    .setMaxAxesVal(result.getResultMatrix().length + 5)
+                    .setMaxAxesVal(result.getResultMatrix().get(0).length + 5)
                     .setYName("Количество узлов")
                     .setFileName("pre3.png")
                     .setChartTitle(name)
@@ -41,7 +41,7 @@ public class ExperimentHelper {
 
         List<XYSeries> series = new ArrayList<>();
         series.addAll(result.getAMaxSeries());
-        series.addAll(result.getAMinSeries());
+        //series.addAll(result.getAMinSeries());
 
         ChartHelper.saveChartToFile(new ChartData()
                 .setSeries(series)
@@ -51,7 +51,7 @@ public class ExperimentHelper {
                 .setYName("Доступность")
                 .setFileName("pre1.png")
                 .setShowLegend(true)
-                .setChartHeight(300)
+                .setChartHeight(600)
         );
         mergeImagesFileNames.add("pre1.png");
 
