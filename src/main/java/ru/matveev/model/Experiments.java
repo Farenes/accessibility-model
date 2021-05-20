@@ -186,7 +186,7 @@ public class Experiments {
         Experiments.makeExperiment(new MetaSpanningTreeAlphaExperiment(
                 "Эксперимент 010. С лучшей новой связью с макс",
                 "",
-                1000, alpha,
+                count, alpha,
                 preGen,
                 new MaxSpanningTreeCounter(),
                 new AddingBestAmaxEdgeStep(),

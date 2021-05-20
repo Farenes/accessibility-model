@@ -41,11 +41,11 @@ public class SteppingExperiment implements Experiment {
         double min = 10000;
         double max = -10000;
 
-        log.debug(MatrixUtils.print(matrix));
+        //log.debug(MatrixUtils.print(matrix));
         while (!endingCondition.isEnd(new StepResult().setStep(step).setMatrix(matrix))) {
             try {
                 matrix = this.step.make(new StepData().setMatrix(matrix));
-                log.debug(MatrixUtils.print(matrix));
+                //log.debug(MatrixUtils.print(matrix));
             } catch (EarlyEndException e) {
                 min = 0.7d;
                 max = 0.9d;

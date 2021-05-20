@@ -377,7 +377,7 @@ public class MatrixCountHelper {
         return Math.sqrt(1 - Math.pow(d/dMax, 2));
     }
 
-    private static double countAvailabilityLinearRight(double d, int length) {
+    public static double countAvailabilityLinearRight(double d, int length) {
         double dMax = countDMax(length);
         return 1 - (d/dMax);
     }
