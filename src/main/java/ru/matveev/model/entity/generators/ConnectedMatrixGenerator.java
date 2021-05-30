@@ -14,8 +14,7 @@ public class ConnectedMatrixGenerator implements MatrixGenerator {
     @Override
     public double[][] generate() {
         int maxEdges = vertexes * (vertexes - 1) / 2;
-        int minEdges = vertexes;
-        int edges = (int) Math.round(connected * (maxEdges - minEdges) + minEdges);
+        int edges = (int) Math.round(maxEdges);
         return MatrixEditorHelper.generateMatrix(vertexes, edges, 0.85, 0.99);
     }
 }
