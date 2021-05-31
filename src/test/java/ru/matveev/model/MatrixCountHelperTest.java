@@ -6,10 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import ru.matveev.model.entity.ChartData;
 import ru.matveev.model.entity.ExperimentResult;
-import ru.matveev.model.entity.generators.MatrixGenerator;
-import ru.matveev.model.entity.generators.MaxSpanningTreeCounter;
-import ru.matveev.model.entity.generators.PreInitMatrixGenerator;
-import ru.matveev.model.entity.generators.RandomMatrixGenerator;
+import ru.matveev.model.entity.generators.*;
 import ru.matveev.model.entity.steps.AddingBestAmaxEdgeStep;
 import ru.matveev.model.experiment.Experiment;
 import ru.matveev.model.experiment.MetaSpanningTreeAlphaExperiment;
@@ -78,6 +75,22 @@ public class MatrixCountHelperTest {
     }
 
     @Test
+    public void testCloseness() throws IOException {
+
+        ClosenessMatrixGenerator matrixGenerator = new ClosenessMatrixGenerator(10, 11, 0.57);
+        double[][] matrix = matrixGenerator.generate();
+        GraphHelper.visualizeGraph(matrix);
+        log.debug(MatrixUtils.printForPaste(matrix));
+    }
+
+    @Test
+    public void testClosenessMinMax() throws IOException {
+
+        ClosenessMatrixGenerator matrixGenerator = new ClosenessMatrixGenerator(10, 11, 0.8);
+        log.debug("{}", matrixGenerator.getMinMaxCloseness());
+    }
+
+    @Test
     public void testT() {
         double[][] matrixHMax = MatrixCountHelper.countMatrixHMax(InterestingMatrix.matrix0);
         double[][] fwMax = MatrixCountHelper.countMatrixFWMax(InterestingMatrix.matrix0, matrixHMax);
@@ -132,12 +145,35 @@ public class MatrixCountHelperTest {
 
     @Test
     public void testVisualize() throws IOException {
-        GraphHelper.visualizeGraph(InterestingMatrix.matrix3);
+        log.debug("{}", MatrixCountHelper.countCloseness(InterestingMatrix.superBestMatrix1));
+        MatrixCountHelper.countBetweenness(InterestingMatrix.superBestMatrix1);
+        //GraphHelper.visualizeGraph(InterestingMatrix.superBestMatrix1);
+        //GephiHelper.visualizeGraph(InterestingMatrix.superBestMatrix3);
+        MatrixUtils.toGephiFormat(InterestingMatrix.superBestMatrix3, "gephi1_n.csv", "gephi1_e.csv");
     }
 
     @Test
     public void allTest() throws IOException {
         Experiments.all();
+    }
+
+    @Test
+    public void testRemovingBestSpanningTree() {
+        double alpha = 0.00001;
+        int vertexes = 6;
+        int edges = 10;
+        int count = 1;
+        PreInitMatrixGenerator preGen = new PreInitMatrixGenerator(count, vertexes, edges);
+        Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с макс",
+                "",
+                count, alpha,
+                () -> InterestingMatrix.superBestMatrix3,
+                MatrixCountHelper::getBestRemovingSpanningTree,
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        ExperimentResult result = spanningTreeMaxExperiment.make();
+        log.debug(MatrixUtils.print(result.getResultMatrix().get(0)));
     }
 
     @Test

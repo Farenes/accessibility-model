@@ -1,5 +1,9 @@
 package ru.matveev.model.utils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -66,6 +70,31 @@ public class MatrixUtils {
             }
         }
         return true;
+    }
+
+    public static void toGephiFormat(double[][] matrix, String vertexesFile, String edgesFile) throws IOException {
+        File vertexes = new File(vertexesFile);
+        File edges = new File(edgesFile);
+        BufferedWriter vertexesWriter = new BufferedWriter(new FileWriter(vertexes));
+        vertexesWriter.write("id;label\n");
+        for (int i=0; i<matrix.length; i++) {
+            vertexesWriter.write((i+1) + ";" + (i+1) + "\n");
+        }
+        vertexesWriter.flush();
+        vertexesWriter.close();
+
+        BufferedWriter edgesWriter = new BufferedWriter(new FileWriter(edges));
+        edgesWriter.write("Source;Target;Label;Weight\n");
+        for (int i=0; i<matrix.length; i++) {
+            for (int j=0; j<matrix.length; j++) {
+                if (i != j && matrix[i][j] > 0) {
+                    String w = String.format("%.2f", matrix[i][j]).replace(",", ".");
+                    edgesWriter.write((i+1) + ";" + (j+1) + ";" + w + ";" + w + "\n");
+                }
+            }
+        }
+        edgesWriter.flush();
+        edgesWriter.close();
     }
 
 }

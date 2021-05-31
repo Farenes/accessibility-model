@@ -2,6 +2,7 @@ package ru.matveev.model.immit.entity;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import ru.matveev.model.utils.MatrixCountHelper;
 import ru.matveev.model.utils.MatrixUtils;
 
 import java.util.ArrayList;
@@ -25,7 +26,11 @@ public class NetworkHelper {
         this.derectiveTime = derectiveTime;
         this.switchers = switchers;
         switchers.forEach(sw -> sw.setNetworkHelper(this));
-        paths = countPaths(matrix);
+        paths = MatrixCountHelper.countPaths(matrix);
+    }
+
+    public List<Integer>[][] getPaths() {
+        return paths;
     }
 
     public void countResult() {
@@ -62,38 +67,6 @@ public class NetworkHelper {
 
     public Switcher getSwitcher(int i) {
         return switchers.get(i);
-    }
-
-    public static List<Integer>[][] countPaths(double[][] nearMatrix) {
-        List<Integer>[][] paths = new List[nearMatrix.length][nearMatrix.length];
-
-        double[][] matrixFW = MatrixUtils.copyMatrix(nearMatrix);
-        for (int i=0; i<matrixFW.length-1; i++) {
-            for (int j=i+1; j<matrixFW.length; j++) {
-                if (nearMatrix[i][j] > 0) {
-                    paths[i][j] = Stream.of(j).collect(Collectors.toList());
-                    paths[j][i] = Stream.of(i).collect(Collectors.toList());
-                }
-            }
-        }
-
-        for (int k=0; k<matrixFW.length; k++) {
-            for (int i=0; i<matrixFW.length; i++) {
-                for (int j=0; j<matrixFW.length; j++) {
-                    if (i != k && j != k
-                            && matrixFW[i][k] > 0d
-                            && matrixFW[k][j] > 0d
-                            && matrixFW[i][j] < matrixFW[k][j] * matrixFW[i][k]) {
-                        matrixFW[i][j] = matrixFW[k][j] * matrixFW[i][k];
-                        paths[i][j] = new ArrayList<>();
-                        paths[i][j].addAll(paths[i][k]);
-                        paths[i][j].addAll(paths[k][j]);
-                    }
-                }
-            }
-        }
-
-        return paths;
     }
 
 }

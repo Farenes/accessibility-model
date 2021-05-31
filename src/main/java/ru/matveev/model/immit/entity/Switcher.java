@@ -27,6 +27,10 @@ public class Switcher implements Runnable {
         this.networkHelper = networkHelper;
     }
 
+    public int getQueueSize() {
+        return inputQueue.size();
+    }
+
     public void addPacket(Packet packet) {
         inputQueue.add(packet);
     }

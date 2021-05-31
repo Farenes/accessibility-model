@@ -80,6 +80,73 @@ public class MatrixCountHelper {
         return matrix[x][y] + matrix[y][x];// - foundNotZero(initMatrix, x) - foundNotZero(initMatrix, y);
     }
 
+    public static double countCloseness(double[][] matrix) {
+        double cMax = 1 / ((double) matrix.length*(matrix.length-1));
+
+        List<Integer>[][] paths = countPaths(matrix);
+        int count = 0;
+        for (int i=0; i<paths.length; i++) {
+            for (int j=0; j<paths.length; j++) {
+                if (i != j) {
+                    count += paths[i][j].size();
+                }
+            }
+        }
+
+        double c = 1 / (double) count;
+
+        return c/cMax;
+    }
+
+    public static double countBetweenness(double[][] matrix) {
+        Map<Integer, Integer> betweenness = new HashMap<>();
+        List<Integer>[][] paths = countPaths(matrix);
+        for (int i=0; i<paths.length; i++) {
+            for (int j = 0; j < paths.length; j++) {
+                if (i != j && paths[i][j].size() > 1) {
+                    for (int k=0; k<paths[i][j].size()-1; k++) {
+                        betweenness.merge(paths[i][j].get(k), 1, Integer::sum);
+                    }
+                }
+            }
+        }
+
+        log.debug("{}", betweenness);
+        return 0;
+    }
+
+    public static List<Integer>[][] countPaths(double[][] nearMatrix) {
+        List<Integer>[][] paths = new List[nearMatrix.length][nearMatrix.length];
+
+        double[][] matrixFW = MatrixUtils.copyMatrix(nearMatrix);
+        for (int i=0; i<matrixFW.length-1; i++) {
+            for (int j=i+1; j<matrixFW.length; j++) {
+                if (nearMatrix[i][j] > 0) {
+                    paths[i][j] = Stream.of(j).collect(Collectors.toList());
+                    paths[j][i] = Stream.of(i).collect(Collectors.toList());
+                }
+            }
+        }
+
+        for (int k=0; k<matrixFW.length; k++) {
+            for (int i=0; i<matrixFW.length; i++) {
+                for (int j=0; j<matrixFW.length; j++) {
+                    if (i != k && j != k
+                            && matrixFW[i][k] > 0d
+                            && matrixFW[k][j] > 0d
+                            && matrixFW[i][j] < matrixFW[k][j] * matrixFW[i][k]) {
+                        matrixFW[i][j] = matrixFW[k][j] * matrixFW[i][k];
+                        paths[i][j] = new ArrayList<>();
+                        paths[i][j].addAll(paths[i][k]);
+                        paths[i][j].addAll(paths[k][j]);
+                    }
+                }
+            }
+        }
+
+        return paths;
+    }
+
     public static double countAMax(double[][] initNearMatrix) {
         double[][] matrixH = countMatrixHMax(initNearMatrix);
         double[][] matrixFW = countMatrixFWMax(initNearMatrix, matrixH);
@@ -249,6 +316,33 @@ public class MatrixCountHelper {
         }
 
         return sumI;
+    }
+
+    public static double[][] getBestRemovingSpanningTree(double[][] matrix) {
+        matrix = MatrixUtils.copyMatrix(matrix);
+        int spanningTreeSize = matrix.length-1;
+        int i = MatrixCountHelper.countEdges(matrix);
+        while (i > spanningTreeSize) {
+            List<Triple<Integer, Integer,Double>> edges = getPossibleNextEdges(matrix);
+            double[][] maxMatrix = null;
+            double aMax = -1000;
+            for (int j=0; j<edges.size(); j++) {
+                double[][] matrix1 = MatrixUtils.copyMatrix(matrix);
+                matrix1[edges.get(j).getLeft()][edges.get(j).getMiddle()] = 0;
+                matrix1[edges.get(j).getMiddle()][edges.get(j).getLeft()] = 0;
+                double currentAmax = MatrixCountHelper.countAMax(matrix1);
+                if (currentAmax > aMax) {
+                    aMax = currentAmax;
+                    maxMatrix = matrix1;
+                }
+            }
+            if (maxMatrix == null) {
+                return null;
+            }
+            matrix = maxMatrix;
+            i = MatrixCountHelper.countEdges(matrix);
+        }
+        return matrix;
     }
 
     public static double[][] getMaxSpanningTree(double[][] matrix) {

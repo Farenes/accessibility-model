@@ -11,6 +11,7 @@ import java.util.Map;
 @Accessors(chain = true)
 public class MetaExperimentResult {
     private double[][] resultMatrix;
+    private double spanningAMax;
     private double deltaAMax;
     private double lgDeltaAMax;
     private int increaseStep;
