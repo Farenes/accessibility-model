@@ -3,9 +3,8 @@ package ru.matveev.model;
 import org.junit.Test;
 import ru.matveev.model.entity.generators.MatrixGenerator;
 import ru.matveev.model.entity.generators.MaxSpanningTreeCounter;
-import ru.matveev.model.entity.generators.PreInitMatrixGenerator;
-import ru.matveev.model.entity.generators.RandomMatrixGenerator;
 import ru.matveev.model.entity.generators.ConnectedMatrixGenerator;
+import ru.matveev.model.entity.generators.RandomMatrixGeneratorWithCentrality;
 import ru.matveev.model.entity.steps.AddingBestAmaxEdgeStep;
 import ru.matveev.model.experiment.CompareExperiment;
 import ru.matveev.model.experiment.Experiment;
@@ -21,10 +20,10 @@ public class RunningExperiments {
         double alpha = 0.00001;
         int vertexes = 10;
         int edges = 10;
-        int count = 1000;
+        int count = 1;
 
         // 1 задание: определить свой matrixGenerator, который будет выдавать матрицы с определенными характеристиками
-        MatrixGenerator matrixGenerator = new PreInitMatrixGenerator(count, vertexes, edges);
+        MatrixGenerator matrixGenerator = new RandomMatrixGeneratorWithCentrality(vertexes, edges);
         Experiments.makeExperiment(new MetaSpanningTreeAlphaExperiment(
                 "Эксперимент 010. С лучшей новой связью с макс", // влияет на название файла с графиками
                 "",
