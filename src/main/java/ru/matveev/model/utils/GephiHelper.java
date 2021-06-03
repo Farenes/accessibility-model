@@ -5,17 +5,13 @@ import org.apache.commons.io.IOUtils;
 import org.gephi.graph.api.*;
 import org.gephi.io.exporter.api.ExportController;
 import org.gephi.io.exporter.preview.PDFExporter;
-import org.gephi.io.exporter.preview.PNGExporter;
 import org.gephi.layout.plugin.AutoLayout;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.gephi.layout.plugin.forceAtlas.ForceAtlasLayout;
-import org.gephi.layout.plugin.fruchterman.FruchtermanReingold;
-import org.gephi.layout.plugin.random.RandomLayout;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.project.api.Workspace;
 import org.openide.util.Lookup;
@@ -37,17 +33,17 @@ public class GephiHelper {
 
         List<Node> nodes = new ArrayList<>();
 
-        for (int i=0; i<matrix.length; i++) {
-            Node n = graphModel.factory().newNode("" + (i+1));
-            n.setLabel("" + (i+1));
+        for (int i = 0; i < matrix.length; i++) {
+            Node n = graphModel.factory().newNode("" + (i + 1));
+            n.setLabel("" + (i + 1));
             n.setSize(1f);
             nodes.add(n);
         }
 
         List<Edge> edges = new ArrayList<>();
 
-        for (int i=0; i<matrix.length; i++) {
-            for (int j=0; j<matrix.length; j++) {
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix.length; j++) {
                 if (i != j && matrix[i][j] > 0) {
                     Edge e = graphModel.factory().newEdge(nodes.get(i), nodes.get(j), 0, 1.0, false);
                     e.setLabel(String.format("%.2f", matrix[i][j]).replace(",", "."));
