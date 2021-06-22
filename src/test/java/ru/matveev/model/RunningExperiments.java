@@ -3,8 +3,8 @@ package ru.matveev.model;
 import org.junit.Test;
 import ru.matveev.model.entity.generators.MatrixGenerator;
 import ru.matveev.model.entity.generators.MaxSpanningTreeCounter;
-import ru.matveev.model.entity.generators.PreInitMatrixGenerator;
-import ru.matveev.model.entity.generators.RandomMatrixGenerator;
+import ru.matveev.model.entity.generators.ConnectedMatrixGenerator;
+import ru.matveev.model.entity.generators.RandomMatrixGeneratorWithCentrality;
 import ru.matveev.model.entity.steps.AddingBestAmaxEdgeStep;
 import ru.matveev.model.experiment.CompareExperiment;
 import ru.matveev.model.experiment.Experiment;
@@ -19,11 +19,11 @@ public class RunningExperiments {
     public void firstTask() {
         double alpha = 0.00001;
         int vertexes = 10;
-        int edges = 25;
-        int count = 1000;
+        int edges = 10;
+        int count = 1;
 
         // 1 задание: определить свой matrixGenerator, который будет выдавать матрицы с определенными характеристиками
-        MatrixGenerator matrixGenerator = new PreInitMatrixGenerator(count, vertexes, edges);
+        MatrixGenerator matrixGenerator = new RandomMatrixGeneratorWithCentrality(vertexes, edges);
         Experiments.makeExperiment(new MetaSpanningTreeAlphaExperiment(
                 "Эксперимент 010. С лучшей новой связью с макс", // влияет на название файла с графиками
                 "",
@@ -39,7 +39,6 @@ public class RunningExperiments {
     public void secondTask() {
         double alpha = 0.00001;
         int vertexes = 10;
-        int edges = 25;
         int count = 1000;
 
         // 2 задание: определить свой matrixGenerator, который будет выдавать матрицы с определенными характеристиками
@@ -48,7 +47,7 @@ public class RunningExperiments {
         // connected - связность, от 0 до 1, 1 - полносвязный, 0 - остов или несвязный
         // Создать генераторы ConnectedMatrixGenerator(0.4), ConnectedMatrixGenerator(0.5), ConnectedMatrixGenerator(0.6)
         // Создать эксперименты с каждым видом генератора, примерно как ниже
-        MatrixGenerator matrixGenerator1 = new RandomMatrixGenerator(vertexes, edges); //подставить свой с 0.4
+        MatrixGenerator matrixGenerator1 = new ConnectedMatrixGenerator(vertexes, 0.4); //подставить свой с 0.4
         Experiment experiment1 = new MetaSpanningTreeAlphaExperiment(
                 "Эксперимент 012. Связность 0.4", // влияет на название файла с графиками
                 "",
@@ -58,7 +57,7 @@ public class RunningExperiments {
                 new AddingBestAmaxEdgeStep(), // оставить как есть, это лучший алгоритм
                 stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()) // оставить как есть, заканчивает когда количество связей становится как в изначальной матрице
         );
-        MatrixGenerator matrixGenerator2 = new RandomMatrixGenerator(vertexes, edges); //подставить свой с 0.5
+        MatrixGenerator matrixGenerator2 = new ConnectedMatrixGenerator(vertexes, 0.5); //подставить свой с 0.5
         Experiment experiment2 = new MetaSpanningTreeAlphaExperiment(
                 "Эксперимент 012. Связность 0.4", // влияет на название файла с графиками
                 "",
