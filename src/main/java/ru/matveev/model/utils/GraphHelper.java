@@ -47,13 +47,9 @@ public class GraphHelper {
         {
             graph.getModel().endUpdate();
         }
-//        mxHierarchicalLayout layout = new mxHierarchicalLayout(graph);
-//        layout.setParallelEdgeSpacing(40);
-//        layout.setInterRankCellSpacing(40);
-//        layout.setIntraCellSpacing(40);
+
         Map<String, Object> styles = graph.getStylesheet().getDefaultEdgeStyle();
         styles.remove(mxConstants.STYLE_ENDARROW);
-        //styles.merge(mxConstants.STYLE_ENDARROW, mxConstants.ARROW_OPEN, (k, v) -> v);
         mxFastOrganicLayout layout = new mxFastOrganicLayout(graph);
         layout.setForceConstant(120);
         layout.setDisableEdgeStyle(false);

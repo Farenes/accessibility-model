@@ -448,6 +448,12 @@ public class MatrixCountHelper {
         }
     }
 
+    public static void setZeroToMainDiagonal(double[][] matrix) {
+        for (int i=0; i<matrix.length; i++) {
+            matrix[i][i] = 0;
+        }
+    }
+
     private static double countDSmall(double length) {
         return -0.000305962 * Math.pow(length, 3) + 0.0628791 * Math.pow(length, 2) + 1.20093 * length - 1.8333;
     }

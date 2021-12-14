@@ -11,13 +11,13 @@ import java.util.List;
  */
 public class PreInitMatrixGenerator implements MatrixGenerator {
 
-    private List<double[][]> matrixes;
+    private final List<double[][]> matrixes;
     private int caret = 0;
 
     public PreInitMatrixGenerator(int count, int vertexes, int edges) {
         matrixes = new ArrayList<>();
         for (int i=0; i<count; i++) {
-            matrixes.add(MatrixEditorHelper.generateMatrix(vertexes, edges, 0.5, 0.85));
+            matrixes.add(MatrixEditorHelper.generateMatrix(vertexes, edges, 0.5, 0.9));
         }
     }
 

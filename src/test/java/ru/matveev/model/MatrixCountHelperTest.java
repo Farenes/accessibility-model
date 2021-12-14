@@ -160,20 +160,39 @@ public class MatrixCountHelperTest {
     @Test
     public void testRemovingBestSpanningTree() {
         double alpha = 0.00001;
-        int vertexes = 6;
-        int edges = 10;
-        int count = 1;
+        int vertexes = 8;
+        int edges = 15;
+        int count = 1000;
         PreInitMatrixGenerator preGen = new PreInitMatrixGenerator(count, vertexes, edges);
         Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
                 "Эксперимент 011. С лучшей новой связью с макс",
                 "",
                 count, alpha,
-                () -> InterestingMatrix.superBestMatrix3,
+                preGen,
                 MatrixCountHelper::getBestRemovingSpanningTree,
                 new AddingBestAmaxEdgeStep(),
                 stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
         ExperimentResult result = spanningTreeMaxExperiment.make();
-        log.debug(MatrixUtils.print(result.getResultMatrix().get(0)));
+    }
+
+    @Test
+    public void testRun1() throws Exception {
+        double alpha = 0.00001;
+        Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с макс",
+                "",
+                1, alpha,
+                () -> InterestingMatrix.superBestMatrix20Percent8,
+                MatrixCountHelper::getBestRemovingSpanningTree,
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        ExperimentResult result = spanningTreeMaxExperiment.make();
+        //GephiHelper.visualizeGraph(InterestingMatrix.superBestMatrix20Percent);
+        MatrixCountHelper.setZeroToMainDiagonal(InterestingMatrix.superBestMatrix20Percent8);
+        System.out.println(MatrixUtils.print(InterestingMatrix.superBestMatrix20Percent8));
+        double[][] resultM = result.getResultMatrix().get(0);
+        MatrixCountHelper.setZeroToMainDiagonal(resultM);
+        System.out.println(MatrixUtils.print(resultM));
     }
 
     @Test

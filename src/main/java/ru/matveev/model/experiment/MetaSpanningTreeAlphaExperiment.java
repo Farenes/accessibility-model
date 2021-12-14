@@ -146,10 +146,11 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
 
         double finishAMax = MatrixCountHelper.countAMax(matrix);
         double deltaAMax = (finishAMax - startAMax) / startAMax;
-        if (deltaAMax >= 0.11) {
+        if (deltaAMax >= 0.19) {
             log.debug(MatrixUtils.printForPaste(initMatrix));
             log.debug("Init Amax: {}" , startAMax);
             log.debug("Finish Amax: {}" , finishAMax);
+            log.debug("Delta Amax: {}" , deltaAMax);
         }
         double startLogAMax = -Math.log10(1 - startAMax);
         double finishLogAMax = -Math.log10(1 - finishAMax);
