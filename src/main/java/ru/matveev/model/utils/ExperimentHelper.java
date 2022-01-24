@@ -41,14 +41,13 @@ public class ExperimentHelper {
 
         List<XYSeries> series = new ArrayList<>();
         series.addAll(result.getAMaxSeries());
-        //series.addAll(result.getAMinSeries());
 
         ChartHelper.saveChartToFile(new ChartData()
                 .setSeries(series)
                 .setMinAxesVal(result.getMinAxesVal() - 0.001)
                 .setMaxAxesVal(result.getMaxAxesVal() + 0.001)
-                .setXName("Шаг")
-                .setYName("Доступность")
+                .setXName("m(k)/m(k)max, %")
+                .setYName("Δ, %")
                 .setFileName("pre1.png")
                 .setShowLegend(true)
                 .setChartHeight(600)

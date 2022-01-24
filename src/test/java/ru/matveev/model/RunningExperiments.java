@@ -1,6 +1,9 @@
 package ru.matveev.model;
 
+import org.jfree.data.xy.XYDataItem;
+import org.jfree.data.xy.XYSeries;
 import org.junit.Test;
+import ru.matveev.model.entity.ExperimentResult;
 import ru.matveev.model.entity.generators.MatrixGenerator;
 import ru.matveev.model.entity.generators.MaxSpanningTreeCounter;
 import ru.matveev.model.entity.generators.PreInitMatrixGenerator;
@@ -9,8 +12,13 @@ import ru.matveev.model.entity.steps.AddingBestAmaxEdgeStep;
 import ru.matveev.model.experiment.CompareExperiment;
 import ru.matveev.model.experiment.Experiment;
 import ru.matveev.model.experiment.MetaSpanningTreeAlphaExperiment;
+import ru.matveev.model.utils.ExperimentHelper;
+import ru.matveev.model.utils.GraphHelper;
+import ru.matveev.model.utils.InterestingMatrix;
 import ru.matveev.model.utils.MatrixCountHelper;
+import ru.matveev.model.utils.MatrixForShowing;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RunningExperiments {
@@ -73,6 +81,86 @@ public class RunningExperiments {
                 "Эксперимент 013. Сравнение по связности", // будет названием файла
                 "",
                 List.of(experiment1, experiment2)));
+    }
+
+    /*
+     * Тест на проверку зависимости изменения aMax от количества связей с растущим количеством узлов
+     * 20.12.2021
+     */
+    @Test
+    public void testLinks() throws Exception {
+        double alpha = 0.00001;
+        int vertexes = 9;
+        int count = 1000;
+
+        List<XYSeries> aMaxSeries = new ArrayList<>();
+        for (int i=0; i<4; i++) {
+            XYSeries series = makeExperimentByVertexes(vertexes, count, alpha);
+            aMaxSeries.add(series);
+            vertexes += 3;
+        }
+
+        ExperimentResult fullResult = new ExperimentResult()
+                .setAMaxSeries(aMaxSeries)
+                .setMinAxesVal(findMin(aMaxSeries))
+                .setMaxAxesVal(findMax(aMaxSeries));
+
+        ExperimentHelper.saveResultToFile("Зависимость", fullResult);
+    }
+
+    private XYSeries makeExperimentByVertexes(int vertexes, int count, double alpha) {
+        XYSeries aMaxSeries = new XYSeries("n=" + vertexes);
+
+        int minEdges = vertexes-1;
+        int maxEdges = (vertexes-1) * vertexes / 2;
+        int currentEdges = minEdges;
+        for (int i=0; i<10; i++) {
+            double proc = currentEdges / (double) maxEdges;
+            double aMax = makeExperimentByEdge(vertexes, currentEdges, count, alpha);
+            aMaxSeries.add(proc*100, aMax);
+            currentEdges = Math.min(maxEdges, currentEdges + (maxEdges / 10));
+        }
+
+        return aMaxSeries;
+    }
+
+    private double makeExperimentByEdge(int vertexes, int edges, int count, double alpha) {
+        Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с макс",
+                "",
+                count, alpha,
+                new RandomMatrixGenerator(vertexes, edges),
+                new MaxSpanningTreeCounter(),
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        ExperimentResult result = spanningTreeMaxExperiment.make();
+        return result.getMaxAMaxGrow();
+    }
+
+    private double findMax(List<XYSeries> series) {
+        double max = -10000;
+        for (XYSeries s: series) {
+            for (Object i: s.getItems()) {
+                XYDataItem k = (XYDataItem) i;
+                if (k.getYValue() > max) {
+                    max = k.getYValue();
+                }
+            }
+        }
+        return max;
+    }
+
+    private double findMin(List<XYSeries> series) {
+        double min = 10000;
+        for (XYSeries s: series) {
+            for (Object i: s.getItems()) {
+                XYDataItem k = (XYDataItem) i;
+                if (k.getYValue() < min) {
+                    min = k.getYValue();
+                }
+            }
+        }
+        return min;
     }
 
 }

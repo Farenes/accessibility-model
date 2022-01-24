@@ -8,15 +8,21 @@ import ru.matveev.model.entity.generators.MatrixGenerator;
 import ru.matveev.model.entity.generators.SpanningTreeCounter;
 import ru.matveev.model.entity.steps.Step;
 import ru.matveev.model.exception.EarlyEndException;
+import ru.matveev.model.utils.GraphHelper;
 import ru.matveev.model.utils.MatrixCountHelper;
+import ru.matveev.model.utils.MatrixForShowing;
 import ru.matveev.model.utils.MatrixUtils;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.DoubleStream;
 
 @Slf4j
 @RequiredArgsConstructor
 public class MetaSpanningTreeAlphaExperiment implements Experiment {
+
+    private int i=0;
 
     private final String name;
     private final String description;
@@ -26,9 +32,15 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
     private final SpanningTreeCounter spanningTreeCounter;
     private final Step step;
     private final EndingCondition endingCondition;
+    private BufferedWriter bufferedWriter;
 
     @Override
     public ExperimentResult make() {
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter("d8.txt"));
+        } catch (Exception e) {
+
+        }
         List<Double> aMaxDeltas = new ArrayList<>();
         List<Double> spanningTreesAMax = new ArrayList<>();
         List<Double> lgAMaxDeltas = new ArrayList<>();
@@ -65,7 +77,8 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
         log.debug("Spanning tree average aMax: {}", spanningTreesAMax.stream().mapToDouble(Double::doubleValue).average().orElse(0));
         log.debug("Max steps: {}", edges - (vertexes-1));
         aMaxDeltas.sort(Comparator.comparing(Double::doubleValue).reversed());
-        log.debug("Max aMax grow: {} %", aMaxDeltas.stream().mapToDouble(Double::doubleValue).max().orElse(0)*100);
+        double maxAMaxGrow = aMaxDeltas.stream().mapToDouble(Double::doubleValue).max().orElse(0)*100;
+        log.debug("Max aMax grow: {} %", maxAMaxGrow);
         log.debug("Average aMax grow: {} %", aMaxDeltas.stream().mapToDouble(Double::doubleValue).average().orElse(0)*100);
         log.debug("Average Lg aMax grow: {} %", lgAMaxDeltas.stream().mapToDouble(Double::doubleValue).average().orElse(0)*100);
         log.debug("Average step for equal: {}", Math.round(increaseSteps.stream().mapToInt(Integer::intValue).average().orElse(0)));
@@ -90,8 +103,15 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
             min = DoubleStream.of(min, aMin, aMax).min().orElse(min);
             max = DoubleStream.of(max, aMin, aMax).max().orElse(max);
         }
+        try {
+            bufferedWriter.flush();
+            bufferedWriter.close();
+        } catch (Exception e) {
+
+        }
 
         return new ExperimentResult()
+                .setMaxAMaxGrow(maxAMaxGrow)
                 .setResultMatrix(resultMatrixes)
                 .setAMinSeries(List.of(aMinSeries))
                 .setAMaxSeries(List.of(aMaxSeries))
@@ -146,8 +166,19 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
 
         double finishAMax = MatrixCountHelper.countAMax(matrix);
         double deltaAMax = (finishAMax - startAMax) / startAMax;
-        if (deltaAMax >= 0.19) {
+        if (deltaAMax >= 0.16) {
             log.debug(MatrixUtils.printForPaste(initMatrix));
+            log.debug(MatrixUtils.printForPaste(matrix));
+            try {
+                GraphHelper.visualizeGraph(initMatrix, "d8_" + (++i) + "_start");
+                GraphHelper.visualizeGraph(matrix, "d8_" + i + "_finish" );
+                bufferedWriter.write("Эксперимент " + i + "\n");
+                bufferedWriter.write("Начальный aMax " + startAMax + "\n");
+                bufferedWriter.write("Конечный aMax " + finishAMax + "\n");
+                bufferedWriter.write("Прирост aMax " + deltaAMax + "%\n");
+            } catch (Exception e) {
+
+            }
             log.debug("Init Amax: {}" , startAMax);
             log.debug("Finish Amax: {}" , finishAMax);
             log.debug("Delta Amax: {}" , deltaAMax);

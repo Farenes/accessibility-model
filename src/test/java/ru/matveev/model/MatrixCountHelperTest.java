@@ -79,8 +79,13 @@ public class MatrixCountHelperTest {
 
         ClosenessMatrixGenerator matrixGenerator = new ClosenessMatrixGenerator(10, 11, 0.57);
         double[][] matrix = matrixGenerator.generate();
-        GraphHelper.visualizeGraph(matrix);
+        GraphHelper.visualizeGraph(matrix, "graph");
         log.debug(MatrixUtils.printForPaste(matrix));
+    }
+
+    @Test
+    public void ttt22() throws IOException {
+        GraphHelper.visualizeGraph(InterestingMatrix.superBestMatrix3, "graph");
     }
 
     @Test
@@ -218,5 +223,27 @@ public class MatrixCountHelperTest {
         ExperimentResult result = spanningTreeMaxExperiment.make();
         ChartHelper.getGist("gist2.png", result.getResultMatrix(), 30);
     }
+
+    @Test
+    public void show() {
+        double alpha = 0.00001;
+        int vertexes = 9;
+        int count = 1000;
+        int edges = 11;
+
+        Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с макс",
+                "",
+                count, alpha,
+                () -> new RandomMatrixGenerator(8, 11).generate(),
+                new MaxSpanningTreeCounter(),
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        ExperimentResult result = spanningTreeMaxExperiment.make();
+        // 1. 9 при 30%
+        // 2. 12 при 30%
+        // 3. 15 при 30%
+    }
+
 
 }

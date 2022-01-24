@@ -11,6 +11,6 @@ public class RandomMatrixGenerator implements MatrixGenerator {
 
     @Override
     public double[][] generate() {
-        return MatrixEditorHelper.generateMatrix(vertexes, edges, 0.85, 0.99);
+        return MatrixEditorHelper.generateMatrix(vertexes, edges, 0.7, 0.99);
     }
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CompareExperiment implements Experiment {
+public class CompareExperiment extends BaseExperiment {
 
     private final String name;
     private final String description;
@@ -33,32 +33,6 @@ public class CompareExperiment implements Experiment {
                 .setAMinSeries(aMinSeries)
                 .setMinAxesVal(findMin(aMinSeries))
                 .setMaxAxesVal(findMax(aMaxSeries));
-    }
-
-    private double findMax(List<XYSeries> series) {
-        double max = -10000;
-        for (XYSeries s: series) {
-            for (Object i: s.getItems()) {
-                XYDataItem k = (XYDataItem) i;
-                if (k.getYValue() > max) {
-                    max = k.getYValue();
-                }
-            }
-        }
-        return max;
-    }
-
-    private double findMin(List<XYSeries> series) {
-        double min = 10000;
-        for (XYSeries s: series) {
-            for (Object i: s.getItems()) {
-                XYDataItem k = (XYDataItem) i;
-                if (k.getYValue() < min) {
-                    min = k.getYValue();
-                }
-            }
-        }
-        return min;
     }
 
     @Override

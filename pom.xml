@@ -12,7 +12,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
+            <version>1.18.22</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -22,22 +22,17 @@
         <dependency>
             <groupId>jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>1.0.12</version>
+            <version>1.0.13</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
+            <version>1.7.33</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mxgraph</groupId>
-            <artifactId>jgraphx</artifactId>
-            <version>3.7.4</version>
         </dependency>
         <dependency>
             <groupId>org.gephi</groupId>
@@ -47,7 +42,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

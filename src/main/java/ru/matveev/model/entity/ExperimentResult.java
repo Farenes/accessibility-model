@@ -19,5 +19,6 @@ public class ExperimentResult {
     private XYSeries pointsSeries;
     private double minAxesVal;
     private double maxAxesVal;
+    private double maxAMaxGrow;
 
 }

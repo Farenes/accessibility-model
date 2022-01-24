@@ -5,6 +5,8 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.AbstractRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import ru.matveev.model.entity.ChartData;
@@ -16,6 +18,7 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,8 +79,15 @@ public class ChartHelper {
         plot.setBackgroundPaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.BLACK);
         plot.setDomainGridlinePaint(Color.BLACK);
+        ((XYLineAndShapeRenderer) plot.getRenderer(0)).setLegendLine(new Line2D.Double(-20.0D, 0.0D, 20.0D, 0.0D));
+        plot.getRenderer(0).setSeriesStroke(0, new BasicStroke(1.0f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {2.0f}, 0.0f));
+        plot.getRenderer(0).setSeriesPaint(0, Color.BLACK);
+        plot.getRenderer(0).setSeriesStroke(1, new BasicStroke(1.0f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {5.0f}, 0.0f));
+        plot.getRenderer(0).setSeriesPaint(1, Color.BLACK);
+        plot.getRenderer(0).setSeriesStroke(2, new BasicStroke(1.0f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {5.0f, 5.0f, 2.0f, 5.0f}, 0.0f));
+        plot.getRenderer(0).setSeriesPaint(2, Color.BLACK);
         plot.getRenderer(0).setSeriesPaint(3, Color.BLACK);
-        plot.getRenderer(0).setSeriesPaint(4, Color.ORANGE);
+        plot.getRenderer(0).setSeriesPaint(4, Color.BLACK);
 
         plot.getRangeAxis().setRange(chartData.getMinAxesVal(), chartData.getMaxAxesVal());
 

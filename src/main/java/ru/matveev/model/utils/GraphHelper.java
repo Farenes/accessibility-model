@@ -1,62 +1,68 @@
 package ru.matveev.model.utils;
 
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.layout.mxEdgeLabelLayout;
-import com.mxgraph.layout.mxFastOrganicLayout;
-import com.mxgraph.layout.mxParallelEdgeLayout;
-import com.mxgraph.layout.orthogonal.mxOrthogonalLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxCellRenderer;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.view.mxGraph;
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.visualization.VisualizationImageServer;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.decorators.EdgeShape;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class GraphHelper {
 
-    public static void visualizeGraph(double[][] matrix) throws IOException {
-        mxGraph graph = new mxGraph();
-        Object parent = graph.getDefaultParent();
+    public static void visualizeGraph(double[][] matrix, String name) throws IOException {
+        DirectedSparseGraph<String, GraphEdge> g = new DirectedSparseGraph<>();
 
-        graph.getModel().beginUpdate();
-        List<Object> vertex = new ArrayList<>();
-        try
-        {
-            for (int i=0; i<matrix.length; i++) {
-                Object v1 = graph.insertVertex(parent, null, ""+i, 20, 20, 20,
-                        20);
-                vertex.add(v1);
-            }
+        for (int i=0; i<matrix.length; i++) {
+            g.addVertex(""+i);
+        }
 
-            for (int i=0; i<matrix.length; i++) {
-                for (int j=i+1; j<matrix.length; j++) {
-                    if (matrix[i][j] != 0) {
-                        graph.insertEdge(parent, null, String.format("%.2f", (matrix[i][j] + matrix[j][i])/2), vertex.get(i), vertex.get(j));
-                    }
+        for (int i=0; i<matrix.length; i++) {
+            for (int j=i+1; j<matrix.length; j++) {
+                if (matrix[i][j] != 0) {
+                    g.addEdge(new GraphEdge(String.format("%.2f", matrix[i][j])), ""+i, ""+j);
+                    g.addEdge(new GraphEdge(String.format("%.2f", matrix[j][i])), ""+j, ""+i);
                 }
             }
         }
-        finally
-        {
-            graph.getModel().endUpdate();
+
+        VisualizationViewer<String, GraphEdge> vv =
+                new VisualizationViewer<>(
+                        new CircleLayout<>(g), new Dimension(1200,800));
+
+        VisualizationImageServer<String, GraphEdge> vis =
+                new VisualizationImageServer<>(vv.getGraphLayout(),
+                        vv.getGraphLayout().getSize());
+
+        vis.setBackground(Color.WHITE);
+        vis.getRenderContext().setEdgeLabelTransformer(GraphEdge::getVal);
+        vis.getRenderContext().setEdgeShapeTransformer(new EdgeShape.QuadCurve<>());
+        vis.getRenderContext().setVertexLabelTransformer(s -> s);
+        vis.getRenderContext().setVertexFillPaintTransformer(s -> Color.WHITE);
+        vis.getRenderContext().setVertexShapeTransformer(s -> new Ellipse2D.Double(-15, -15, 30, 30));
+
+        vis.getRenderer().getVertexLabelRenderer()
+                .setPosition(Renderer.VertexLabel.Position.CNTR);
+
+        BufferedImage image = (BufferedImage) vis.getImage(
+                new Point2D.Double(vv.getGraphLayout().getSize().getWidth() / 2,
+                        vv.getGraphLayout().getSize().getHeight() / 2),
+                new Dimension(vv.getGraphLayout().getSize()));
+
+        try {
+            ImageIO.write(image, "PNG", new File(name + ".png"));
+        } catch (IOException e) {
+            // Exception handling
         }
-
-        Map<String, Object> styles = graph.getStylesheet().getDefaultEdgeStyle();
-        styles.remove(mxConstants.STYLE_ENDARROW);
-        mxFastOrganicLayout layout = new mxFastOrganicLayout(graph);
-        layout.setForceConstant(120);
-        layout.setDisableEdgeStyle(false);
-        layout.execute(graph.getDefaultParent());
-
-        BufferedImage image = mxCellRenderer.createBufferedImage(graph, null, 1, Color.WHITE, true, null);
-        ImageIO.write(image, "PNG", new File("graph.png"));
     }
 
 }
