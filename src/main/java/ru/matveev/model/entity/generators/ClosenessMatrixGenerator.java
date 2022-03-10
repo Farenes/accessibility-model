@@ -6,6 +6,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.matveev.model.utils.MatrixCountHelper;
 import ru.matveev.model.utils.MatrixEditorHelper;
 
+
+/**
+ * Генератор матрицы по переданному значения степени близости (closeness)
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class ClosenessMatrixGenerator implements MatrixGenerator {

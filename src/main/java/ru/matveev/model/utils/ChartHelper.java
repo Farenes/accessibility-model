@@ -5,12 +5,10 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import ru.matveev.model.entity.ChartData;
-import ru.matveev.model.entity.generators.MatrixGenerator;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;

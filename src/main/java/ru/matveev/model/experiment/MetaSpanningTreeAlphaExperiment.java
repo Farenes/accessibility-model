@@ -10,7 +10,6 @@ import ru.matveev.model.entity.steps.Step;
 import ru.matveev.model.exception.EarlyEndException;
 import ru.matveev.model.utils.GraphHelper;
 import ru.matveev.model.utils.MatrixCountHelper;
-import ru.matveev.model.utils.MatrixForShowing;
 import ru.matveev.model.utils.MatrixUtils;
 
 import java.io.BufferedWriter;
@@ -22,8 +21,6 @@ import java.util.stream.DoubleStream;
 @RequiredArgsConstructor
 public class MetaSpanningTreeAlphaExperiment implements Experiment {
 
-    private int i=0;
-
     private final String name;
     private final String description;
     private final int count;
@@ -32,85 +29,60 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
     private final SpanningTreeCounter spanningTreeCounter;
     private final Step step;
     private final EndingCondition endingCondition;
-    private BufferedWriter bufferedWriter;
 
     @Override
     public ExperimentResult make() {
-        try {
-            bufferedWriter = new BufferedWriter(new FileWriter("d8.txt"));
-        } catch (Exception e) {
-
-        }
-        List<Double> aMaxDeltas = new ArrayList<>();
-        List<Double> spanningTreesAMax = new ArrayList<>();
-        List<Double> lgAMaxDeltas = new ArrayList<>();
-        List<Map<Integer, Double>> aMinExps = new ArrayList<>();
-        List<Map<Integer, Double>> aMaxExps = new ArrayList<>();
-        List<Integer> increaseSteps = new ArrayList<>();
-        List<Integer> finalSteps = new ArrayList<>();
         List<double[][]> resultMatrixes = new ArrayList<>();
         int vertexes = 0;
         int edges = 0;
         int fails = 0;
+        List<MetaExperimentResult> metaExperimentResults = new ArrayList<>();
         for (int i=0; i<count; i++) {
             MetaExperimentResult result = null;
             while (result == null || result.getDeltaAMax() < 0) {
-                result = oneExp();
+                result = makeOneExperiment();
                 if (result.getDeltaAMax() < 0) {
                     fails++;
                 }
             }
+            metaExperimentResults.add(result);
 
-            aMaxDeltas.add(result.getDeltaAMax());
-            lgAMaxDeltas.add(result.getLgDeltaAMax());
-            spanningTreesAMax.add(result.getSpanningAMax());
-            aMinExps.add(result.getAMinMap());
-            aMaxExps.add(result.getAMaxMap());
-            increaseSteps.add(result.getIncreaseStep());
-            finalSteps.add(result.getFinalStep());
             vertexes = result.getVertexes();
             edges = result.getEdges();
             resultMatrixes.add(result.getResultMatrix());
         }
 
         log.debug("Spanning tree size: {}", vertexes-1);
-        log.debug("Spanning tree average aMax: {}", spanningTreesAMax.stream().mapToDouble(Double::doubleValue).average().orElse(0));
-        log.debug("Max steps: {}", edges - (vertexes-1));
-        aMaxDeltas.sort(Comparator.comparing(Double::doubleValue).reversed());
-        double maxAMaxGrow = aMaxDeltas.stream().mapToDouble(Double::doubleValue).max().orElse(0)*100;
+        log.debug("Spanning tree average aMax: {}", metaExperimentResults.stream().mapToDouble(MetaExperimentResult::getSpanningAMax).average().orElse(0));
+        log.debug("Max steps from spanning tree to init size: {}", edges - (vertexes-1));
+        double maxAMaxGrow = metaExperimentResults.stream().mapToDouble(MetaExperimentResult::getDeltaAMax).max().orElse(0)*100;
         log.debug("Max aMax grow: {} %", maxAMaxGrow);
-        log.debug("Average aMax grow: {} %", aMaxDeltas.stream().mapToDouble(Double::doubleValue).average().orElse(0)*100);
-        log.debug("Average Lg aMax grow: {} %", lgAMaxDeltas.stream().mapToDouble(Double::doubleValue).average().orElse(0)*100);
-        log.debug("Average step for equal: {}", Math.round(increaseSteps.stream().mapToInt(Integer::intValue).average().orElse(0)));
-        log.debug("Average steps for alpha: {}", Math.round(finalSteps.stream().mapToInt(Integer::intValue).average().orElse(0)));
+        log.debug("Average aMax grow: {} %", metaExperimentResults.stream().mapToDouble(MetaExperimentResult::getDeltaAMax).average().orElse(0)*100);
+        log.debug("Average step for equal: {}", Math.round(metaExperimentResults.stream().mapToInt(MetaExperimentResult::getIncreaseStep).average().orElse(0)));
+        log.debug("Average steps for alpha: {}", Math.round(metaExperimentResults.stream().mapToInt(MetaExperimentResult::getFinalStep).average().orElse(0)));
         log.debug("Fails: {} on {} experiments", fails, count);
 
         XYSeries aMinSeries = new XYSeries("AMin");
         XYSeries aMaxSeries = new XYSeries("AMax");
 
-        int aMinMax = aMinExps.stream().flatMap(map -> map.keySet().stream()).mapToInt(Integer::intValue).max().orElse(0);
-        int aMaxMax = aMaxExps.stream().flatMap(map -> map.keySet().stream()).mapToInt(Integer::intValue).max().orElse(0);
+        int aMinMax = metaExperimentResults.stream().flatMap(exp -> exp.getAMinMap().keySet().stream()).mapToInt(Integer::intValue).max().orElse(0);
+        int aMaxMax = metaExperimentResults.stream().flatMap(exp -> exp.getAMaxMap().keySet().stream()).mapToInt(Integer::intValue).max().orElse(0);
 
         double min = 10000;
         double max = -10000;
 
         for (int i=0; i<Math.max(aMinMax, aMaxMax)+1; i++) {
             int key = i;
-            double aMax = aMaxExps.stream().map(map -> map.getOrDefault(key, null)).filter(d -> d != null && !d.isNaN()).mapToDouble(Double::doubleValue).average().orElse(0);
-            double aMin = aMinExps.stream().map(map -> map.getOrDefault(key, null)).filter(d -> d != null && !d.isNaN()).mapToDouble(Double::doubleValue).average().orElse(0);
+            double aMax = metaExperimentResults.stream().map(exp -> exp.getAMaxMap().getOrDefault(key, null)).filter(d -> d != null && !d.isNaN()).mapToDouble(Double::doubleValue).average().orElse(0);
+            double aMin = metaExperimentResults.stream().map(exp -> exp.getAMinMap().getOrDefault(key, null)).filter(d -> d != null && !d.isNaN()).mapToDouble(Double::doubleValue).average().orElse(0);
             aMinSeries.add(key, aMin);
             aMaxSeries.add(key, aMax);
             min = DoubleStream.of(min, aMin, aMax).min().orElse(min);
             max = DoubleStream.of(max, aMin, aMax).max().orElse(max);
         }
-        try {
-            bufferedWriter.flush();
-            bufferedWriter.close();
-        } catch (Exception e) {
-
-        }
 
         return new ExperimentResult()
+                .setExperiments(metaExperimentResults)
                 .setMaxAMaxGrow(maxAMaxGrow)
                 .setResultMatrix(resultMatrixes)
                 .setAMinSeries(List.of(aMinSeries))
@@ -119,16 +91,17 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
                 .setMaxAxesVal(max);
     }
 
-    private MetaExperimentResult oneExp() {
+    private MetaExperimentResult makeOneExperiment() {
         double[][] initMatrix = matrixGenerator.generate();
 
         double startAMax = MatrixCountHelper.countAMax(initMatrix);
+        double startAMin = MatrixCountHelper.countAMin(initMatrix);
 
         Map<Integer, Double> aMinMap = new HashMap<>();
         Map<Integer, Double> aMaxMap = new HashMap<>();
 
         aMaxMap.put(0, startAMax);
-        aMinMap.put(0, MatrixCountHelper.countAMin(initMatrix));
+        aMinMap.put(0, startAMin);
 
         double[][] matrix = spanningTreeCounter.count(initMatrix);
         double spanningTreeAMax = MatrixCountHelper.countAMax(matrix);
@@ -165,29 +138,17 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
         }
 
         double finishAMax = MatrixCountHelper.countAMax(matrix);
-        double deltaAMax = (finishAMax - startAMax) / startAMax;
-        if (deltaAMax >= 0.16) {
-            log.debug(MatrixUtils.printForPaste(initMatrix));
-            log.debug(MatrixUtils.printForPaste(matrix));
-            try {
-                GraphHelper.visualizeGraph(initMatrix, "d8_" + (++i) + "_start");
-                GraphHelper.visualizeGraph(matrix, "d8_" + i + "_finish" );
-                bufferedWriter.write("Эксперимент " + i + "\n");
-                bufferedWriter.write("Начальный aMax " + startAMax + "\n");
-                bufferedWriter.write("Конечный aMax " + finishAMax + "\n");
-                bufferedWriter.write("Прирост aMax " + deltaAMax + "%\n");
-            } catch (Exception e) {
+        double finishAMin = MatrixCountHelper.countAMin(matrix);
 
-            }
-            log.debug("Init Amax: {}" , startAMax);
-            log.debug("Finish Amax: {}" , finishAMax);
-            log.debug("Delta Amax: {}" , deltaAMax);
-        }
-        double startLogAMax = -Math.log10(1 - startAMax);
-        double finishLogAMax = -Math.log10(1 - finishAMax);
-        double logDeltaAMax = (finishLogAMax - startLogAMax) / startLogAMax;
+        double deltaAMax = (finishAMax - startAMax) / startAMax;
+        double deltaAMin = (finishAMin - startAMin) / startAMin;
 
         return new MetaExperimentResult()
+                .setStartAMax(startAMax)
+                .setResultAMax(finishAMax)
+                .setStartAMin(startAMin)
+                .setResultAMin(finishAMin)
+                .setStartMatrix(initMatrix)
                 .setResultMatrix(matrix)
                 .setVertexes(initMatrix.length)
                 .setEdges(MatrixCountHelper.countEdges(initMatrix))
@@ -195,7 +156,7 @@ public class MetaSpanningTreeAlphaExperiment implements Experiment {
                 .setAMaxMap(aMaxMap)
                 .setAMinMap(aMinMap)
                 .setDeltaAMax(deltaAMax)
-                .setLgDeltaAMax(logDeltaAMax)
+                .setDeltaAMin(deltaAMin)
                 .setIncreaseStep(increaseStep)
                 .setFinalStep(step-1);
     }

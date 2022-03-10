@@ -20,5 +20,6 @@ public class ExperimentResult {
     private double minAxesVal;
     private double maxAxesVal;
     private double maxAMaxGrow;
+    private List<MetaExperimentResult> experiments;
 
 }

@@ -3,6 +3,7 @@ package ru.matveev.model;
 import lombok.extern.slf4j.Slf4j;
 import ru.matveev.model.entity.ExperimentResult;
 import ru.matveev.model.entity.InitData;
+import ru.matveev.model.entity.MetaExperimentResult;
 import ru.matveev.model.entity.generators.BestRandomSpanningTreeCounter;
 import ru.matveev.model.entity.generators.MaxSpanningTreeCounter;
 import ru.matveev.model.entity.generators.PreInitMatrixGenerator;
@@ -13,28 +14,19 @@ import ru.matveev.model.experiment.Experiment;
 import ru.matveev.model.experiment.MetaSpanningTreeAlphaExperiment;
 import ru.matveev.model.experiment.SteppingExperiment;
 import ru.matveev.model.utils.ExperimentHelper;
+import ru.matveev.model.utils.GraphHelper;
 import ru.matveev.model.utils.MatrixCountHelper;
 import ru.matveev.model.utils.MatrixEditorHelper;
 import ru.matveev.model.utils.MatrixUtils;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 @Slf4j
 public class Experiments {
-
-    public void runAll() {
-        addingEdgesExperiment001();
-        addingVertexAndEdges002();
-        addingVertexWithOneEdge003();
-        randomRemovingEdges004();
-        removingWorseEdgesAndAddingToWorsePath005();
-        addingEdgesToMaxSpanningTreeWithDifferentAlphas006();
-        addingEdgesToMaxSpanningTreeForStarTopology007();
-        addingEdgesToMaxSpanningTreeWithWorsePath008();
-        addingEdgesToMaxSpanningTreeWithBestAverageEdge009();
-        addingEdgesToMaxAndRandomSpanningTreeWithBestAverageEdge010();
-        addingEdgesToMaxAndRandomSpanningTreeWithBestAverageEdge011();
-    }
 
     public static void addingEdgesExperiment001() {
         Experiment experiment = new SteppingExperiment(
@@ -284,6 +276,39 @@ public class Experiments {
         } catch (Exception e) {
             log.error("", e);
         }
+    }
+
+    public static void makeExperimentWithResultsToFile(int vertexes, int edges, double deltaProc) throws IOException {
+        GraphHelper graphHelper = new GraphHelper(new Properties());
+        Experiment spanningTreeMaxExperiment = new MetaSpanningTreeAlphaExperiment(
+                "Эксперимент 011. С лучшей новой связью с макс",
+                "",
+                1000, 0.00001d,
+                () -> new RandomMatrixGenerator(vertexes, edges).generate(),
+                new MaxSpanningTreeCounter(),
+                new AddingBestAmaxEdgeStep(),
+                stepResult -> MatrixCountHelper.countEdges(stepResult.getMatrix()) >= MatrixCountHelper.countEdges(stepResult.getInitMatrix()));
+        ExperimentResult result = spanningTreeMaxExperiment.make();
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("d" + vertexes + ".txt"));
+        int expNum = 1;
+        for (int i=0; i<result.getExperiments().size(); i++) {
+            MetaExperimentResult exp = result.getExperiments().get(i);
+            if (exp.getDeltaAMax() > deltaProc) {
+                graphHelper.visualizeGraph(exp.getStartMatrix(), "d" + vertexes + "_" + expNum + "_start");
+                graphHelper.visualizeGraph(exp.getResultMatrix(), "d" + vertexes + "_" + expNum + "_finish" );
+                bufferedWriter.write("Эксперимент " + expNum + "\n");
+                bufferedWriter.write("Начальный aMax " + exp.getStartAMax() + "\n");
+                bufferedWriter.write("Конечный aMax " + exp.getResultAMax() + "\n");
+                bufferedWriter.write("Прирост aMax " + exp.getDeltaAMax() + "%\n");
+                bufferedWriter.write("Начальный aMin " + exp.getStartAMin() + "\n");
+                bufferedWriter.write("Конечный aMin " + exp.getResultAMin() + "\n");
+                bufferedWriter.write("Прирост aMin " + exp.getDeltaAMin() + "%\n");
+                expNum++;
+            }
+        }
+        bufferedWriter.flush();
+        bufferedWriter.close();
     }
 
 }
